@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgriVision - Crop Yield Monitoring</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div id="loginScreen" class="login-screen">
+    <div class="login-brand">
+      <div class="brand-mark"><span>AV</span></div>
+      <p>SMART AGRICULTURE PLATFORM</p>
+    </div>
+    <div class="login-card">
+      <div class="login-heading">
+        <span class="eyebrow">Welcome back</span>
+        <h1>Sign in to AgriVision</h1>
+        <p>Monitor your farms and plan with confidence.</p>
+      </div>
+      <form id="loginForm" novalidate>
+        <label for="email">Email address</label>
+        <input id="email" type="email" placeholder="farmer@agrivision.demo" required>
+        <label for="password">Password</label>
+        <div class="password-wrap">
+          <input id="password" type="password" placeholder="Enter your password" required>
+          <button type="button" id="togglePassword" aria-label="Show password">Show</button>
+        </div>
+        <div id="loginError" class="form-error" role="alert"></div>
+        <button class="primary-btn login-btn" type="submit">Sign in</button>
+      </form>
+      <div class="demo-credentials">
+        <strong>Demo credentials</strong>
+        <button type="button" data-email="farmer@agrivision.demo" data-password="farmer123">Farmer</button>
+        <button type="button" data-email="admin@agrivision.demo" data-password="admin123">Admin</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="appShell" class="app-shell hidden">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-mark small"><span>AV</span></div>
+        <div><strong>AgriVision</strong><small>Farm Intelligence</small></div>
+      </div>
+      <nav class="side-nav">
+        <button class="nav-item active" data-page="dashboard"><span class="nav-icon">⌂</span><span>Dashboard</span></button>
+        <button class="nav-item" data-page="farms"><span class="nav-icon">◫</span><span>My Farms</span></button>
+        <button class="nav-item" data-page="monitoring"><span class="nav-icon">◉</span><span>Live Monitoring</span></button>
+        <button class="nav-item" data-page="history"><span class="nav-icon">⌁</span><span>Historical Data</span></button>
+        <button class="nav-item" data-page="prediction"><span class="nav-icon">◇</span><span>Yield Prediction</span></button>
+        <button class="nav-item" data-page="alerts"><span class="nav-icon">♢</span><span>Alerts</span><b id="alertCount" class="nav-badge">0</b></button>
+        <button class="nav-item" data-page="devices"><span class="nav-icon">▣</span><span>Device Management</span></button>
+        <button class="nav-item" data-page="settings"><span class="nav-icon">⚙</span><span>Settings</span></button>
+      </nav>
+      <button class="nav-item logout" id="logoutBtn"><span class="nav-icon">↪</span><span>Logout</span></button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button id="menuBtn" class="menu-btn" aria-label="Open menu">☰</button>
+        <div>
+          <span class="topbar-date" id="topbarDate"></span>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" id="topAlertBtn" aria-label="View alerts">♢<b id="topAlertDot"></b></button>
+          <div class="profile">
+            <div class="avatar" id="profileInitial">AP</div>
+            <div><strong id="profileName">Arjun Patel</strong><small id="profileRole">Farmer</small></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+        <section id="page-dashboard" class="page active">
+          <div class="page-heading">
+            <div><span class="eyebrow">Farm overview</span><h1 id="welcomeTitle">Good morning, Arjun</h1><p>Here is what is happening across your farms today.</p></div>
+            <button class="primary-btn" data-nav="prediction">New prediction</button>
+          </div>
+          <div class="demo-banner"><span>DEMO DATA</span> Sensor readings are simulated for this project demonstration.</div>
+          <div class="stat-grid">
+            <article class="stat-card"><div class="stat-icon green">◫</div><div><span>Registered farms</span><strong id="totalFarms">0</strong><small>Across your account</small></div></article>
+            <article class="stat-card"><div class="stat-icon amber">▣</div><div><span>Active devices</span><strong id="activeDevices">0</strong><small id="deviceStatusText">Sensors connected</small></div></article>
+            <article class="stat-card"><div class="stat-icon blue">◌</div><div><span>Soil moisture</span><strong id="dashMoisture">--%</strong><small id="moistureStatus">Waiting for data</small></div></article>
+            <article class="stat-card"><div class="stat-icon orange">°</div><div><span>Temperature</span><strong id="dashTemperature">--°C</strong><small id="temperatureStatus">Waiting for data</small></div></article>
+          </div>
+          <div class="dashboard-grid">
+            <article class="panel sensor-overview">
+              <div class="panel-heading"><div><span class="eyebrow">Live conditions</span><h2>Environmental overview</h2></div><span class="status-pill online" id="dashConnection">● Online</span></div>
+              <div class="mini-sensor-grid">
+                <div><span class="mini-icon blue">◌</span><p>Humidity</p><strong id="dashHumidity">--%</strong></div>
+                <div><span class="mini-icon yellow">☀</span><p>Light intensity</p><strong id="dashLight">-- lux</strong></div>
+                <div><span class="mini-icon green">◇</span><p>Latest yield estimate</p><strong id="dashYield">-- tonnes</strong></div>
+              </div>
+            </article>
+            <article class="panel alert-panel">
+              <div class="panel-heading"><div><span class="eyebrow">Notifications</span><h2>Recent alerts</h2></div><button class="text-btn" data-nav="alerts">View all</button></div>
+              <div id="recentAlerts" class="alert-list"></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="page-farms" class="page">
+          <div class="page-heading"><div><span class="eyebrow">Farm records</span><h1>My Farms</h1><p>Manage your cultivated areas and crop details.</p></div><button class="primary-btn" id="addFarmBtn">+ Add new farm</button></div>
+          <div id="farmsGrid" class="farms-grid"></div>
+        </section>
+
+        <section id="page-monitoring" class="page">
+          <div class="page-heading"><div><span class="eyebrow">Live sensor monitoring</span><h1>Field Conditions</h1><p>Simulated readings refresh on demand or every 20 seconds.</p></div><button class="primary-btn" id="simulateBtn">↻ Receive new data</button></div>
+          <div class="demo-banner"><span>SIMULATED DEMO</span> These values do not come from physical ESP32 hardware.</div>
+          <div class="sensor-grid">
+            <article class="sensor-card"><div class="sensor-card-head"><span class="sensor-icon blue">◌</span><div><span>Soil moisture</span><small id="moistureTime">Last update --</small></div><b id="moistureState" class="status-pill online">Online</b></div><strong class="sensor-value" id="soilValue">--<small>%</small></strong><div class="progress"><i id="soilProgress"></i></div><p id="soilHint">Waiting for a reading</p></article>
+            <article class="sensor-card"><div class="sensor-card-head"><span class="sensor-icon orange">°</span><div><span>Temperature</span><small id="temperatureTime">Last update --</small></div><b id="temperatureState" class="status-pill online">Online</b></div><strong class="sensor-value" id="temperatureValue">--<small>°C</small></strong><div class="progress temperature"><i id="temperatureProgress"></i></div><p id="temperatureHint">Waiting for a reading</p></article>
+            <article class="sensor-card"><div class="sensor-card-head"><span class="sensor-icon green">≋</span><div><span>Humidity</span><small id="humidityTime">Last update --</small></div><b id="humidityState" class="status-pill online">Online</b></div><strong class="sensor-value" id="humidityValue">--<small>%</small></strong><div class="progress humidity"><i id="humidityProgress"></i></div><p id="humidityHint">Waiting for a reading</p></article>
+            <article class="sensor-card"><div class="sensor-card-head"><span class="sensor-icon yellow">☀</span><div><span>Light intensity</span><small id="lightTime">Last update --</small></div><b id="lightState" class="status-pill online">Online</b></div><strong class="sensor-value" id="lightValue">--<small>lux</small></strong><div class="progress light"><i id="lightProgress"></i></div><p id="lightHint">Waiting for a reading</p></article>
+          </div>
+        </section>
+
+        <section id="page-history" class="page">
+          <div class="page-heading"><div><span class="eyebrow">Historical monitoring</span><h1>Sensor Trends</h1><p>Explore simulated environmental changes over time.</p></div><select id="historyPeriod" class="field-select"><option value="24">Last 24 hours</option><option value="72">Last 3 days</option><option value="168">Last 7 days</option></select></div>
+          <div class="chart-grid">
+            <article class="panel chart-panel"><div class="panel-heading"><div><h2>Soil moisture</h2><span>Percentage (%)</span></div></div><canvas id="moistureChart"></canvas></article>
+            <article class="panel chart-panel"><div class="panel-heading"><div><h2>Temperature</h2><span>Celsius (°C)</span></div></div><canvas id="temperatureChart"></canvas></article>
+            <article class="panel chart-panel"><div class="panel-heading"><div><h2>Humidity</h2><span>Percentage (%)</span></div></div><canvas id="humidityChart"></canvas></article>
+            <article class="panel chart-panel"><div class="panel-heading"><div><h2>Light intensity</h2><span>Lux</span></div></div><canvas id="lightChart"></canvas></article>
+          </div>
+        </section>
+
+        <section id="page-prediction" class="page">
+          <div class="page-heading"><div><span class="eyebrow">Yield estimator</span><h1>Crop Yield Prediction</h1><p>Enter field conditions to generate a demonstration estimate.</p></div></div>
+          <div class="prediction-layout">
+            <form id="predictionForm" class="panel form-panel">
+              <div class="panel-heading"><div><span class="eyebrow">Input parameters</span><h2>Field information</h2></div></div>
+              <div class="form-grid">
+                <div class="field"><label for="predictFarm">Farm</label><select id="predictFarm" required></select></div>
+                <div class="field"><label for="predictCrop">Crop type</label><select id="predictCrop" required><option value="">Select crop</option><option>Rice</option><option>Wheat</option><option>Maize</option><option>Cotton</option><option>Sugarcane</option><option>Tomato</option><option>Potato</option><option>Soybean</option></select></div>
+                <div class="field"><label for="predictArea">Cultivated area (hectares)</label><input id="predictArea" type="number" min="0.01" step="0.01" required></div>
+                <div class="field"><label for="predictSoil">Soil moisture (%)</label><input id="predictSoil" type="number" min="0" max="100" step="0.1" required></div>
+                <div class="field"><label for="predictTemperature">Temperature (°C)</label><input id="predictTemperature" type="number" step="0.1" required></div>
+                <div class="field"><label for="predictHumidity">Humidity (%)</label><input id="predictHumidity" type="number" min="0" max="100" step="0.1" required></div>
+              </div>
+              <div id="predictionError" class="form-error"></div>
+              <button class="primary-btn wide" type="submit" id="predictBtn">Predict yield</button>
+            </form>
+            <article class="prediction-result panel">
+              <span class="eyebrow">Demo result</span>
+              <div class="result-visual"><div class="leaf-ring">◒</div></div>
+              <h2 id="predictionValue">-- tonnes</h2>
+              <p id="predictionTimestamp">Run a prediction to see an estimate.</p>
+              <div class="disclaimer"><strong>Demonstration estimate</strong><p>This result is calculated by a sample formula prepared for future Scikit-learn integration. It is not a prediction from a trained model.</p></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="page-alerts" class="page">
+          <div class="page-heading"><div><span class="eyebrow">Notifications</span><h1>Alerts & Notifications</h1><p>Review important field and device updates.</p></div></div>
+          <div class="panel">
+            <div id="alertsList" class="full-alert-list"></div>
+          </div>
+        </section>
+
+        <section id="page-devices" class="page">
+          <div class="page-heading"><div><span class="eyebrow">Hardware status</span><h1>Device Management</h1><p>Demo device controls for the simulated ESP32 sensor.</p></div></div>
+          <div class="demo-banner"><span>SIMULATED DEVICE</span> No physical ESP32 or real network connection is configured.</div>
+          <div class="panel table-panel">
+            <div class="table-wrap"><table><thead><tr><th>Device ID</th><th>Device name</th><th>Associated farm</th><th>Status</th><th>Last communication</th><th>Action</th></tr></thead><tbody id="devicesTable"></tbody></table></div>
+          </div>
+        </section>
+
+        <section id="page-settings" class="page">
+          <div class="page-heading"><div><span class="eyebrow">Account preferences</span><h1>Settings</h1><p>Manage your profile and alert thresholds.</p></div></div>
+          <form id="settingsForm" class="settings-grid">
+            <article class="panel form-panel"><div class="panel-heading"><div><span class="eyebrow">Profile</span><h2>Personal information</h2></div></div><div class="form-grid"><div class="field"><label for="profileNameInput">Full name</label><input id="profileNameInput" required></div><div class="field"><label for="profileEmail">Email</label><input id="profileEmail" disabled></div><div class="field"><label for="profilePhone">Phone</label><input id="profilePhone"></div><div class="field"><label for="profileLocation">Location</label><input id="profileLocation"></div></div></article>
+            <article class="panel form-panel"><div class="panel-heading"><div><span class="eyebrow">Thresholds</span><h2>Alert configuration</h2></div></div><div class="form-grid"><div class="field"><label for="moistureThreshold">Low moisture threshold (%)</label><input id="moistureThreshold" type="number" min="0" max="100" required></div><div class="field"><label for="temperatureThreshold">High temperature threshold (°C)</label><input id="temperatureThreshold" type="number" min="-20" max="60" required></div></div></article>
+            <div id="settingsError" class="form-error"></div><button class="primary-btn" type="submit">Save settings</button>
+          </form>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="farmModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-heading"><div><span class="eyebrow">Farm details</span><h2 id="farmModalTitle">Add new farm</h2></div><button type="button" id="closeFarmModal" class="modal-close">×</button></div>
+      <form id="farmForm" novalidate>
+        <input type="hidden" id="farmId">
+        <div class="form-grid"><div class="field"><label for="farmName">Farm name</label><input id="farmName" required></div><div class="field"><label for="farmLocation">Location</label><input id="farmLocation" required></div><div class="field"><label for="farmArea">Cultivated area (hectares)</label><input id="farmArea" type="number" min="0.01" step="0.01" required></div><div class="field"><label for="farmCrop">Crop type</label><select id="farmCrop" required><option value="">Select crop</option><option>Rice</option><option>Wheat</option><option>Maize</option><option>Cotton</option><option>Sugarcane</option><option>Tomato</option><option>Potato</option><option>Soybean</option></select></div></div>
+        <div id="farmError" class="form-error"></div>
+        <div class="modal-actions"><button type="button" class="secondary-btn" id="cancelFarmModal">Cancel</button><button type="submit" class="primary-btn" id="saveFarmBtn">Save farm</button></div>
+      </form>
+    </div>
+  </div>
+  <div id="toastContainer" class="toast-container"></div>
+  <div id="loadingOverlay" class="loading-overlay hidden"><div class="spinner"></div></div>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
